@@ -26,15 +26,38 @@ pip install filetoolkit[bigfileload]
 
 ```
 import filetoolkit
-from filetoolkit import ramdisk
-from filetoolkit import load
 ```
 
 ### RAM disk
 
+Example:
+
+```
+from filetoolkit import ramdisk
+# TBD.
+```
+
+Result:
+
+```
 TBD.
+```
 
 
 ### Progress Bar for Reading Big Files
 
+Example:
+
+```
+import json
+from filetoolkit import load
+with load.readlargefile('2GB.json') as file:
+    v = json.load(file)
+    # ...
+```
+
+Result:
+
+```
 TBD.
+```
