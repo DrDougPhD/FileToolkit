@@ -5,10 +5,12 @@ name = "pypi"
 
 [packages]
 tqdm = "*"
+jafdecs = "*"
 
 [dev-packages]
 pytest = "*"
 filetoolkit = {editable = true, path = "."}
+ipykernel = "*"
 
 [requires]
 python_version = "3"
