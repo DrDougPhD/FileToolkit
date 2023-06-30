@@ -2,36 +2,33 @@ import pathlib
 from typing import Union
 
 from tqdm import tqdm
+from jafdecs import worm
+
+from ..utilities import chunksize
 
 
 def read(path: Union[str, pathlib.Path]) -> bytes:
     return LargeFileReader(path=path)
 
 
+@worm.onproperties
 class LargeFileReader:
     def __init__(self, path: Union[pathlib.Path, str]):
         self.path = pathlib.Path(path)
-        self._progress = None
-        self._file = None
     
     @property
     def progress(self):
-        if self._progress is None:
-            self._progress = tqdm(
-                total=self.path.stat().st_size,
-                unit='B',
-                unit_scale=True,
-                unit_divisor=1024,
-                desc=f'Loading {self.path.name}'
-            )
-        return self._progress
+        return tqdm(
+            total=self.path.stat().st_size,
+            unit='B',
+            unit_scale=True,
+            unit_divisor=1024,
+            desc=f'Loading {self.path.name}'
+        )
     
     @property
     def file(self):
-        if self._file is None:
-            self._file = self.path.open('rb')
-        
-        return self._file
+        return self.path.open('rb')
     
     def __enter__(self):
         return self
@@ -40,8 +37,16 @@ class LargeFileReader:
         self.file.close()
 
     def read(self, *args, **kwargs) -> bytes:
-        response = self.file.read(*args, **kwargs)
-        self.progress.update(len(response))
+        if len(args) > 0 or len(kwargs) > 0:
+            response = self.file.read(*args, **kwargs)
+            self.progress.update(len(response))
+        
+        else:
+            response = b''
+            for chunk in chunksize.optimal(self.path):
+                self.progress.update(len(chunk))
+                response += chunk
+        
         return response
 
     def readline(self, *args, **kwargs) -> bytes:
